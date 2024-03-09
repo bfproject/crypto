@@ -1,0 +1,54 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
+    id 'com.google.dagger.hilt.android'
+}
+
+android {
+    namespace 'com.architecture.data_remote'
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 24
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    buildFeatures {
+        buildConfig = true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+dependencies {
+    implementation project(":core")
+
+    implementation "com.google.dagger:hilt-android:${versions.hiltAndroid}"
+    kapt "com.google.dagger:hilt-compiler:${versions.hiltAndroid}"
+
+    api "com.squareup.retrofit2:retrofit:${versions.retrofit}"
+    api "com.squareup.retrofit2:converter-moshi:${versions.retrofit}"
+    api "com.squareup.moshi:moshi:${versions.moshi}"
+    api "com.squareup.moshi:moshi-kotlin:${versions.moshi}"
+    implementation (platform("com.squareup.okhttp3:okhttp-bom:${versions.okhttp}"))
+    implementation "com.squareup.okhttp3:okhttp"
+    implementation "com.squareup.okhttp3:logging-interceptor"
+}
+
+// Allow references to generated code
+kapt {
+    correctErrorTypes true
+}

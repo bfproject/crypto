@@ -1,0 +1,27 @@
+buildscript {
+    ext.versions = [
+            'activityCompose' : '1.8.2',
+            'composeBom' : '2023.03.00',
+            'coil': '2.5.0',
+            'coreKtx': '1.12.0',
+            'hiltAndroid' : '2.45',
+            'junit' : '4.13.2',
+            'junitAndroid' : '1.1.5',
+            'kotlinxCoroutinesCore': '1.8.0',
+            'lifecycle' : '2.6.2',
+            'mockito' : '4.0.0',
+            'moshi' : '1.14.0',
+            'okhttp' : '4.10.0',
+            'retrofit' : '2.9.0',
+            'room' : '2.6.1',
+            'turbine' : '1.0.0'
+    ]
+}
+
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+plugins {
+id 'com.android.application' version '8.1.2' apply false
+    id 'org.jetbrains.kotlin.android' version '1.8.10' apply false
+    id 'com.google.dagger.hilt.android' version '2.45' apply false
+    id 'com.android.library' version '8.1.2' apply false
+}
