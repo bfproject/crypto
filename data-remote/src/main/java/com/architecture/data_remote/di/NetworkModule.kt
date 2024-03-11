@@ -1,7 +1,7 @@
 package com.architecture.data_remote.di
 
 import com.architecture.data_remote.BuildConfig
-import com.architecture.data_remote.api.Service
+import com.architecture.data_remote.api.ticker.MarketplaceService
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -53,7 +53,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideService(retrofit: Retrofit): Service =
-        retrofit.create(Service::class.java)
+    fun provideService(retrofit: Retrofit): MarketplaceService =
+        retrofit.create(MarketplaceService::class.java)
 
 }
