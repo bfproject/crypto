@@ -15,7 +15,7 @@ class MarketplaceViewModel @Inject constructor(
 ) : BaseViewModel<List<Ticker>, UiState<List<Ticker>>, TickerListUiAction, Nothing>() {
 
     init {
-        submitAction(TickerListUiAction.GetTickerList)
+        submitAction(TickerListUiAction.Search(""))
         submitAction(TickerListUiAction.Load)
     }
 
@@ -27,15 +27,15 @@ class MarketplaceViewModel @Inject constructor(
                 loadTickerList()
             }
 
-            is TickerListUiAction.GetTickerList -> {
-                getTickerList()
+            is TickerListUiAction.Search -> {
+                search(action.query)
             }
         }
     }
 
-    private fun getTickerList() {
+    private fun search(query: String) {
         viewModelScope.launch {
-            marketplaceRepository.tickerList().collect {
+            marketplaceRepository.tickerList(query).collect {
                 submitState(UiState.Success(it))
             }
         }

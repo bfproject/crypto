@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -30,6 +32,7 @@ import com.architecture.core.model.cryptoNamePair
 import com.architecture.core.state.UiState
 import com.architecture.feature_marketplace.common.CustomCircularProgressIndicator
 import com.architecture.feature_marketplace.common.CustomEmptyOrErrorState
+import com.architecture.feature_marketplace.common.SearchBox
 
 @Composable
 fun MarketplaceScreen(viewModel: MarketplaceViewModel = viewModel()) {
@@ -37,13 +40,19 @@ fun MarketplaceScreen(viewModel: MarketplaceViewModel = viewModel()) {
     val state = viewModel.uiStateFlow.collectAsStateWithLifecycle().value
 
     MarketplaceMainView(
-        state = state
+        state = state,
+        onValueChange = {
+            viewModel.submitAction(TickerListUiAction.Search(it))
+        }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MarketplaceMainView(state: UiState<List<Ticker>>) {
+fun MarketplaceMainView(
+    state: UiState<List<Ticker>>,
+    onValueChange: (String) -> Unit,
+) {
     Scaffold(
         topBar = {
             TopAppBar(title = {
@@ -57,6 +66,13 @@ fun MarketplaceMainView(state: UiState<List<Ticker>>) {
             Column(
                 modifier = Modifier.padding(it),
             ) {
+                SearchBox(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .height(52.dp),
+                    onValueChange = onValueChange,
+                )
                 MarketplaceContent(state)
             }
         }
@@ -68,10 +84,18 @@ fun MarketplaceContent(state: UiState<List<Ticker>>) {
     state.let {
         when (it) {
             is UiState.Success -> {
-                LazyColumn {
-                    items(it.data) { item ->
-                        TickerListItem(item)
+                if (it.data.isNotEmpty()) {
+                    LazyColumn {
+                        items(it.data) { item ->
+                            TickerListItem(item)
+                        }
                     }
+                } else {
+                    CustomEmptyOrErrorState(
+                        modifier = Modifier.offset(y = (-56.dp)),
+                        drawableResId = R.drawable.ic_search,
+                        textResId = R.string.search_no_match
+                    )
                 }
             }
 

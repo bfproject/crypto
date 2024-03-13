@@ -6,6 +6,6 @@ sealed class TickerListUiAction: UiAction {
 
     object Load : TickerListUiAction()
 
-    object GetTickerList : TickerListUiAction()
+    data class Search(val query: String) : TickerListUiAction()
 
 }

@@ -43,8 +43,8 @@ class MarketplaceRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun tickerList(): Flow<List<Ticker>> {
-        return tickerDao.tickerList()
+    override fun tickerList(query: String): Flow<List<Ticker>> {
+        return tickerDao.tickerList("%${query}%")
             .map { it.map(TickerEntity::asDomainModel) }
             .flowOn(defaultDispatcher)
     }

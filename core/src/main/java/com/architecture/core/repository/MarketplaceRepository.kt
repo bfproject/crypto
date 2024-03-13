@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface MarketplaceRepository {
     suspend fun loadTickerList(): DataState<Unit>
-    fun tickerList(): Flow<List<Ticker>>
+    fun tickerList(query: String): Flow<List<Ticker>>
 }

@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TickerDao {
 
-    @Query("SELECT * FROM ticker")
-    fun tickerList(): Flow<List<TickerEntity>>
+    @Query("SELECT * FROM ticker WHERE symbol LIKE :query")
+    fun tickerList(query: String): Flow<List<TickerEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTickerList(tickerList: List<TickerEntity>)
