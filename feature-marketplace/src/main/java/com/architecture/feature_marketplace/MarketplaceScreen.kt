@@ -42,7 +42,7 @@ fun MarketplaceScreen(viewModel: MarketplaceViewModel = viewModel()) {
     MarketplaceMainView(
         state = state,
         onValueChange = {
-            viewModel.submitAction(TickerListUiAction.Search(it))
+            viewModel.submitAction(MarketplaceUiAction.Search(it))
         }
     )
 }

@@ -12,22 +12,22 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class MarketplaceViewModel @Inject constructor(
     private val marketplaceRepository: MarketplaceRepository,
-) : BaseViewModel<List<Ticker>, UiState<List<Ticker>>, TickerListUiAction, Nothing>() {
+) : BaseViewModel<List<Ticker>, UiState<List<Ticker>>, MarketplaceUiAction, Nothing>() {
 
     init {
-        submitAction(TickerListUiAction.Search(""))
-        submitAction(TickerListUiAction.Load)
+        submitAction(MarketplaceUiAction.Search(""))
+        submitAction(MarketplaceUiAction.Load)
     }
 
     override fun initState(): UiState<List<Ticker>> = UiState.Loading
 
-    override fun handleAction(action: TickerListUiAction) {
+    override fun handleAction(action: MarketplaceUiAction) {
         when (action) {
-            is TickerListUiAction.Load -> {
+            is MarketplaceUiAction.Load -> {
                 loadTickerList()
             }
 
-            is TickerListUiAction.Search -> {
+            is MarketplaceUiAction.Search -> {
                 search(action.query)
             }
         }
