@@ -1,5 +1,6 @@
 package com.architecture.feature_marketplace
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CardDefaults
@@ -21,8 +23,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,6 +47,8 @@ import kotlinx.coroutines.delay
 fun MarketplaceScreen(viewModel: MarketplaceViewModel = viewModel()) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
 
+    val isOffline = viewModel.isOffline.collectAsStateWithLifecycle().value
+
     // Collect the latest UI state
     val state = viewModel.uiStateFlow.collectAsStateWithLifecycle().value
 
@@ -58,6 +64,7 @@ fun MarketplaceScreen(viewModel: MarketplaceViewModel = viewModel()) {
 
     MarketplaceMainView(
         state = state,
+        isOffline = isOffline,
         onValueChange = {
             viewModel.submitAction(MarketplaceUiAction.Search(it))
         }
@@ -68,6 +75,7 @@ fun MarketplaceScreen(viewModel: MarketplaceViewModel = viewModel()) {
 @Composable
 fun MarketplaceMainView(
     state: UiState<List<Ticker>>,
+    isOffline: Boolean,
     onValueChange: (String) -> Unit,
 ) {
     Scaffold(
@@ -90,19 +98,45 @@ fun MarketplaceMainView(
                         .height(52.dp),
                     onValueChange = onValueChange,
                 )
-                MarketplaceContent(state)
+                if (isOffline) {
+                    Header()
+                }
+                MarketplaceContent(state, isOffline)
             }
         }
     )
 }
 
 @Composable
-fun MarketplaceContent(state: UiState<List<Ticker>>) {
+fun Header() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            modifier = Modifier
+                .padding(end = 4.dp)
+                .size(24.dp),
+            painter = painterResource(R.drawable.ic_offline),
+            contentDescription = null
+        )
+        Text(
+            text = stringResource(R.string.error_msg_no_connection),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+        )
+    }
+}
+
+@Composable
+fun MarketplaceContent(state: UiState<List<Ticker>>, isOffline: Boolean) {
     state.let {
         when (it) {
             is UiState.Success -> {
                 if (it.data.isNotEmpty()) {
-                    LazyColumn {
+                    LazyColumn(modifier = Modifier.alpha(if (isOffline) 0.6f else 1f)) {
                         items(it.data) { item ->
                             TickerListItem(item)
                         }
@@ -180,4 +214,11 @@ fun TickerListItem(ticker: Ticker) {
 @Composable
 fun RowTickerListItemPreview() {
     TickerListItem(ticker = Ticker("tBTCUSD", 0.5, 65000.0))
+}
+
+
+@Preview(showBackground = false)
+@Composable
+fun HeaderPreview() {
+    Header()
 }

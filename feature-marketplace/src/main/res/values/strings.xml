@@ -1,4 +1,5 @@
 <resources>
+    <string name="error_msg_no_connection">No internet connection</string>
     <string name="error_msg_retrieving_ticker_list">It was not possible to retrieve market data</string>
     <string name="marketplace_screen_title">marketplace</string>
     <string name="search_box_placeholder">Search</string>
