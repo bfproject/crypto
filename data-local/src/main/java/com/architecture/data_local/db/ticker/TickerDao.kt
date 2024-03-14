@@ -1,9 +1,8 @@
 package com.architecture.data_local.db.ticker
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 /** The Data Access Object for the TickerEntity class. */
@@ -13,7 +12,7 @@ interface TickerDao {
     @Query("SELECT * FROM ticker WHERE symbol LIKE :query")
     fun tickerList(query: String): Flow<List<TickerEntity>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun insertTickerList(tickerList: List<TickerEntity>)
 
 }

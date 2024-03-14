@@ -16,7 +16,6 @@ class MarketplaceViewModel @Inject constructor(
 
     init {
         submitAction(MarketplaceUiAction.Search(""))
-        submitAction(MarketplaceUiAction.Load)
     }
 
     override fun initState(): UiState<List<Ticker>> = UiState.Loading

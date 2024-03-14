@@ -18,14 +18,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.architecture.core.model.Ticker
 import com.architecture.core.model.cryptoNamePair
@@ -33,11 +37,24 @@ import com.architecture.core.state.UiState
 import com.architecture.feature_marketplace.common.CustomCircularProgressIndicator
 import com.architecture.feature_marketplace.common.CustomEmptyOrErrorState
 import com.architecture.feature_marketplace.common.SearchBox
+import kotlinx.coroutines.delay
 
 @Composable
 fun MarketplaceScreen(viewModel: MarketplaceViewModel = viewModel()) {
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
 
+    // Collect the latest UI state
     val state = viewModel.uiStateFlow.collectAsStateWithLifecycle().value
+
+    LaunchedEffect(true) {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            // Refresh data every 5 seconds
+            while (true) {
+                viewModel.submitAction(MarketplaceUiAction.Load)
+                delay(5000)
+            }
+        }
+    }
 
     MarketplaceMainView(
         state = state,
