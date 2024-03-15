@@ -48,8 +48,6 @@ import kotlinx.coroutines.delay
 fun MarketplaceScreen(viewModel: MarketplaceViewModel = viewModel()) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
 
-    val isOffline = viewModel.isOffline.collectAsStateWithLifecycle().value
-
     // Collect the latest UI state
     val state = viewModel.uiStateFlow.collectAsStateWithLifecycle().value
 
@@ -57,7 +55,7 @@ fun MarketplaceScreen(viewModel: MarketplaceViewModel = viewModel()) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             // Refresh data every 5 seconds
             while (true) {
-                viewModel.pullingData()
+                viewModel.pollingData()
                 delay(5000)
             }
         }
@@ -65,7 +63,6 @@ fun MarketplaceScreen(viewModel: MarketplaceViewModel = viewModel()) {
 
     MarketplaceMainView(
         state = state,
-        isOffline = isOffline,
         onValueChange = {
             viewModel.searchTicker(it)
         }
@@ -76,7 +73,6 @@ fun MarketplaceScreen(viewModel: MarketplaceViewModel = viewModel()) {
 @Composable
 fun MarketplaceMainView(
     state: MarketplaceUiState,
-    isOffline: Boolean,
     onValueChange: (String) -> Unit,
 ) {
     Scaffold(
@@ -99,10 +95,10 @@ fun MarketplaceMainView(
                         .height(52.dp),
                     onValueChange = onValueChange,
                 )
-                if (isOffline) {
+                if (state.isOffline) {
                     Header()
                 }
-                MarketplaceContent(state, isOffline)
+                MarketplaceContent(state)
             }
         }
     )
@@ -132,7 +128,7 @@ fun Header() {
 }
 
 @Composable
-fun MarketplaceContent(state: MarketplaceUiState, isOffline: Boolean) {
+fun MarketplaceContent(state: MarketplaceUiState) {
     state.let {
         if (it.isTickersEmpty) {
             CustomEmptyOrErrorState(
@@ -143,7 +139,7 @@ fun MarketplaceContent(state: MarketplaceUiState, isOffline: Boolean) {
         } else {
             when (it.tickers) {
                 is UiState.Success -> {
-                    LazyColumn(modifier = Modifier.alpha(if (isOffline) 0.6f else 1f)) {
+                    LazyColumn(modifier = Modifier.alpha(state.contentTransparency)) {
                         items((it.tickers as UiState.Success<List<Ticker>>).data) { item ->
                             TickerListItem(item)
                         }

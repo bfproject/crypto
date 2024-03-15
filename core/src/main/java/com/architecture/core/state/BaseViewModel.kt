@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 abstract class BaseViewModel<S : BaseState, A : UiAction> : ViewModel() {
@@ -16,8 +17,6 @@ abstract class BaseViewModel<S : BaseState, A : UiAction> : ViewModel() {
     }
     val uiStateFlow: StateFlow<S> = _uiStateFlow.asStateFlow()
     private val actionFlow: MutableSharedFlow<A> = MutableSharedFlow()
-
-    val state = uiStateFlow.value
 
     init {
         viewModelScope.launch {
@@ -35,10 +34,6 @@ abstract class BaseViewModel<S : BaseState, A : UiAction> : ViewModel() {
         }
     }
 
-    fun submitState(state: S) {
-        viewModelScope.launch {
-            _uiStateFlow.value = state
-        }
-    }
+    fun submitState(state: S) = _uiStateFlow.update { state }
 
 }

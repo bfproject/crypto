@@ -6,6 +6,6 @@ sealed class MarketplaceUiAction: UiAction {
 
     object Load : MarketplaceUiAction()
 
-    data class Search(val query: String) : MarketplaceUiAction()
+    object Search : MarketplaceUiAction()
 
 }

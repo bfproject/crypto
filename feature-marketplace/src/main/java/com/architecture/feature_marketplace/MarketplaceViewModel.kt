@@ -13,7 +13,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -21,17 +23,12 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class MarketplaceViewModel @Inject constructor(
     private val marketplaceRepository: MarketplaceRepository,
-    networkConnectivity: NetworkConnectivity,
+    private val networkConnectivity: NetworkConnectivity,
 ) : BaseViewModel<MarketplaceUiState, MarketplaceUiAction>() {
 
-    val isOffline = networkConnectivity.observeConnectivityChanges().map(Boolean::not).stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = false,
-    )
-
     init {
-        submitAction(MarketplaceUiAction.Search(""))
+        submitAction(MarketplaceUiAction.Search)
+        observeForConnectivityChanges()
     }
 
     override fun initState(): MarketplaceUiState = MarketplaceUiState()
@@ -39,24 +36,37 @@ class MarketplaceViewModel @Inject constructor(
     override fun Flow<MarketplaceUiAction>.handleAction(): Flow<Unit> {
         val search = filterIsInstance<MarketplaceUiAction.Search>()
             .flatMapLatest {
-                marketplaceRepository.tickerList(it.query)
+                marketplaceRepository.tickerList(uiStateFlow.value.query)
                     .map { tickerList ->
-                        submitState(state.copy(tickers = UiState.Success(tickerList)))
-
+                        submitState(uiStateFlow.value.copy(tickers = UiState.Success(tickerList)))
                     }
             }
 
         return search
     }
 
-    fun pullingData() {
+    fun pollingData() {
         viewModelScope.launch {
             marketplaceRepository.loadTickerList()
         }
     }
 
     fun searchTicker(query: String) {
-        submitAction(MarketplaceUiAction.Search(query))
+        submitState(uiStateFlow.value.copy(query = query))
+        submitAction(MarketplaceUiAction.Search)
+    }
+
+    private fun observeForConnectivityChanges() {
+        networkConnectivity.observeConnectivityChanges()
+            .map(Boolean::not)
+            .onEach {
+                submitState(uiStateFlow.value.copy(isOffline = it))
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = false,
+            ).launchIn(viewModelScope)
     }
 
 }
