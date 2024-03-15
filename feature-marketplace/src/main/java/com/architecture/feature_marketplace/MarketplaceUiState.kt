@@ -1,6 +1,8 @@
-package com.architecture.core.state
+package com.architecture.feature_marketplace
 
 import com.architecture.core.model.Ticker
+import com.architecture.core.state.BaseState
+import com.architecture.core.state.UiState
 
 data class MarketplaceUiState(
     val tickers: UiState<List<Ticker>> = UiState.Loading,
@@ -8,5 +10,4 @@ data class MarketplaceUiState(
     val query: String = "",
 ) : BaseState {
     val isTickersEmpty: Boolean = tickers is UiState.Success && tickers.data.isEmpty()
-    val contentTransparency: Float = if (isOffline) 0.6f else 1f
 }

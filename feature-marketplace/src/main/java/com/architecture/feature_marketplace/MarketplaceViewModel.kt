@@ -3,7 +3,6 @@ package com.architecture.feature_marketplace
 import androidx.lifecycle.viewModelScope
 import com.architecture.core.repository.MarketplaceRepository
 import com.architecture.core.state.BaseViewModel
-import com.architecture.core.state.MarketplaceUiState
 import com.architecture.core.state.UiState
 import com.architecture.core.util.NetworkConnectivity
 import dagger.hilt.android.lifecycle.HiltViewModel

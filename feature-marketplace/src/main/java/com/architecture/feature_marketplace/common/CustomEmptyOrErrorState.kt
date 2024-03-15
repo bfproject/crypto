@@ -31,7 +31,6 @@ fun CustomEmptyOrErrorState(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         drawableResId?.let {

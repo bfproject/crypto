@@ -24,7 +24,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -37,11 +36,12 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.architecture.core.model.Ticker
 import com.architecture.core.model.cryptoNamePair
-import com.architecture.core.state.MarketplaceUiState
 import com.architecture.core.state.UiState
 import com.architecture.feature_marketplace.common.CustomCircularProgressIndicator
 import com.architecture.feature_marketplace.common.CustomEmptyOrErrorState
 import com.architecture.feature_marketplace.common.SearchBox
+import com.architecture.feature_marketplace.common.formatPercent
+import com.architecture.feature_marketplace.common.percentColor
 import kotlinx.coroutines.delay
 
 @Composable
@@ -93,10 +93,11 @@ fun MarketplaceMainView(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .height(52.dp),
+                    query = state.query,
                     onValueChange = onValueChange,
                 )
                 if (state.isOffline) {
-                    Header()
+                    OfflineMessage()
                 }
                 MarketplaceContent(state)
             }
@@ -105,7 +106,7 @@ fun MarketplaceMainView(
 }
 
 @Composable
-fun Header() {
+fun OfflineMessage() {
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -129,29 +130,27 @@ fun Header() {
 
 @Composable
 fun MarketplaceContent(state: MarketplaceUiState) {
-    state.let {
-        if (it.isTickersEmpty) {
-            CustomEmptyOrErrorState(
-                modifier = Modifier.offset(y = (-56.dp)),
-                drawableResId = R.drawable.ic_search,
-                textResId = R.string.search_no_match
-            )
-        } else {
-            when (it.tickers) {
-                is UiState.Success -> {
-                    LazyColumn(modifier = Modifier.alpha(state.contentTransparency)) {
-                        items((it.tickers as UiState.Success<List<Ticker>>).data) { item ->
-                            TickerListItem(item)
-                        }
+    if (state.isTickersEmpty) {
+        CustomEmptyOrErrorState(
+            modifier = Modifier.offset(y = (80.dp)),
+            drawableResId = R.drawable.ic_search,
+            textResId = R.string.search_no_match
+        )
+    } else {
+        when (state.tickers) {
+            is UiState.Success -> {
+                LazyColumn(modifier = Modifier.alpha(if (state.isOffline) 0.6f else 1f)) {
+                    items(state.tickers.data) { item ->
+                        TickerListItem(item)
                     }
                 }
-
-                is UiState.Loading -> CustomCircularProgressIndicator(modifier = Modifier.fillMaxHeight())
-                is UiState.Error -> CustomEmptyOrErrorState(
-                    drawableResId = R.drawable.ic_error,
-                    textResId = R.string.error_msg_retrieving_ticker_list
-                )
             }
+
+            is UiState.Loading -> CustomCircularProgressIndicator(modifier = Modifier.fillMaxHeight())
+            is UiState.Error -> CustomEmptyOrErrorState(
+                drawableResId = R.drawable.ic_error,
+                textResId = R.string.error_msg_retrieving_ticker_list
+            )
         }
     }
 }
@@ -163,7 +162,6 @@ fun TickerListItem(ticker: Ticker) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier
@@ -194,13 +192,10 @@ fun TickerListItem(ticker: Ticker) {
                     fontWeight = FontWeight.Bold,
                 )
 
-                val sign = if (ticker.dailyChangeRelative >= 0) "+" else ""
-                val percentage = String.format("%.2f", ticker.dailyChangeRelative * 100).plus("%")
-                val variationColor =
-                    if (ticker.dailyChangeRelative >= 0) MaterialTheme.colorScheme.primary else Color.Red
                 Text(
-                    text = "$sign$percentage",
-                    style = MaterialTheme.typography.labelMedium.copy(color = variationColor)
+                    text = ticker.dailyChangeRelative.formatPercent(),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = ticker.dailyChangeRelative.percentColor,
                 )
             }
         }
@@ -217,5 +212,5 @@ fun RowTickerListItemPreview() {
 @Preview(showBackground = false)
 @Composable
 fun HeaderPreview() {
-    Header()
+    OfflineMessage()
 }

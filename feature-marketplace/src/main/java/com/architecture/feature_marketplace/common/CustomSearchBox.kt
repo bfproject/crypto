@@ -7,10 +7,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -22,9 +18,9 @@ import com.architecture.feature_marketplace.R
 @Composable
 fun SearchBox(
     modifier: Modifier = Modifier,
+    query: String,
     onValueChange: (String) -> Unit,
 ) {
-    var textValue by rememberSaveable { mutableStateOf("") }
     OutlinedTextField(
         modifier = modifier,
         textStyle = TextStyle(fontSize = 14.sp),
@@ -42,9 +38,8 @@ fun SearchBox(
                 style = TextStyle(fontSize = 14.sp),
             )
         },
-        value = textValue,
+        value = query,
         onValueChange = {
-            textValue = it
             onValueChange(it)
         },
     )
@@ -53,5 +48,5 @@ fun SearchBox(
 @Preview
 @Composable
 fun PreviewSearchBox() {
-    SearchBox(onValueChange = { })
+    SearchBox(query = "", onValueChange = { })
 }
