@@ -52,7 +52,13 @@ dependencies {
     implementation "com.google.dagger:hilt-android:${versions.hiltAndroid}"
     kapt "com.google.dagger:hilt-compiler:${versions.hiltAndroid}"
 
+    testImplementation "junit:junit:${versions.junit}"
+    androidTestImplementation "androidx.test.ext:junit:${versions.junitAndroid}"
+    androidTestImplementation platform("androidx.compose:compose-bom:${versions.composeBom}")
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-tooling'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:${versions.kotlinxCoroutinesCore}"
 }
 
 // Allow references to generated code
