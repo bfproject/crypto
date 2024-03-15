@@ -3,7 +3,6 @@ package com.architecture.feature_marketplace.common
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -14,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -37,7 +37,8 @@ fun CustomEmptyOrErrorState(
             Image(
                 modifier = Modifier
                     .padding(bottom = 16.dp)
-                    .size(64.dp),
+                    .size(64.dp)
+                    .testTag("CustomEmptyOrErrorStateImage"),
                 painter = painterResource(id = drawableResId),
                 contentScale = ContentScale.Inside,
                 contentDescription = null
