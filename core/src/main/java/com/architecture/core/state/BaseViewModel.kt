@@ -2,36 +2,32 @@ package com.architecture.core.state
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-abstract class BaseViewModel<T : Any, S : UiState<T>, A : UiAction, E : UiSingleEvent> : ViewModel() {
+abstract class BaseViewModel<S : BaseState, A : UiAction> : ViewModel() {
 
     private val _uiStateFlow: MutableStateFlow<S> by lazy {
         MutableStateFlow(initState())
     }
-    val uiStateFlow: StateFlow<S> = _uiStateFlow
+    val uiStateFlow: StateFlow<S> = _uiStateFlow.asStateFlow()
     private val actionFlow: MutableSharedFlow<A> = MutableSharedFlow()
-    private val _singleEventFlow = Channel<E>()
-    val singleEventFlow = _singleEventFlow.receiveAsFlow()
 
+    val state = uiStateFlow.value
 
     init {
         viewModelScope.launch {
-            actionFlow.collect {
-                handleAction(it)
-            }
+            actionFlow.handleAction().collect {}
         }
     }
 
-
     abstract fun initState(): S
 
-    abstract fun handleAction(action: A)
+    abstract fun Flow<A>.handleAction(): Flow<Unit>
 
     fun submitAction(action: A) {
         viewModelScope.launch {
@@ -45,9 +41,4 @@ abstract class BaseViewModel<T : Any, S : UiState<T>, A : UiAction, E : UiSingle
         }
     }
 
-    fun submitSingleEvent(event: E) {
-        viewModelScope.launch {
-            _singleEventFlow.send(event)
-        }
-    }
 }

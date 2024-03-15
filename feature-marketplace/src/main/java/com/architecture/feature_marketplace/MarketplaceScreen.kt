@@ -37,6 +37,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.architecture.core.model.Ticker
 import com.architecture.core.model.cryptoNamePair
+import com.architecture.core.state.MarketplaceUiState
 import com.architecture.core.state.UiState
 import com.architecture.feature_marketplace.common.CustomCircularProgressIndicator
 import com.architecture.feature_marketplace.common.CustomEmptyOrErrorState
@@ -56,7 +57,7 @@ fun MarketplaceScreen(viewModel: MarketplaceViewModel = viewModel()) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             // Refresh data every 5 seconds
             while (true) {
-                viewModel.submitAction(MarketplaceUiAction.Load)
+                viewModel.pullingData()
                 delay(5000)
             }
         }
@@ -66,7 +67,7 @@ fun MarketplaceScreen(viewModel: MarketplaceViewModel = viewModel()) {
         state = state,
         isOffline = isOffline,
         onValueChange = {
-            viewModel.submitAction(MarketplaceUiAction.Search(it))
+            viewModel.searchTicker(it)
         }
     )
 }
@@ -74,7 +75,7 @@ fun MarketplaceScreen(viewModel: MarketplaceViewModel = viewModel()) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MarketplaceMainView(
-    state: UiState<List<Ticker>>,
+    state: MarketplaceUiState,
     isOffline: Boolean,
     onValueChange: (String) -> Unit,
 ) {
@@ -131,30 +132,30 @@ fun Header() {
 }
 
 @Composable
-fun MarketplaceContent(state: UiState<List<Ticker>>, isOffline: Boolean) {
+fun MarketplaceContent(state: MarketplaceUiState, isOffline: Boolean) {
     state.let {
-        when (it) {
-            is UiState.Success -> {
-                if (it.data.isNotEmpty()) {
+        if (it.isTickersEmpty) {
+            CustomEmptyOrErrorState(
+                modifier = Modifier.offset(y = (-56.dp)),
+                drawableResId = R.drawable.ic_search,
+                textResId = R.string.search_no_match
+            )
+        } else {
+            when (it.tickers) {
+                is UiState.Success -> {
                     LazyColumn(modifier = Modifier.alpha(if (isOffline) 0.6f else 1f)) {
-                        items(it.data) { item ->
+                        items((it.tickers as UiState.Success<List<Ticker>>).data) { item ->
                             TickerListItem(item)
                         }
                     }
-                } else {
-                    CustomEmptyOrErrorState(
-                        modifier = Modifier.offset(y = (-56.dp)),
-                        drawableResId = R.drawable.ic_search,
-                        textResId = R.string.search_no_match
-                    )
                 }
-            }
 
-            is UiState.Loading -> CustomCircularProgressIndicator(modifier = Modifier.fillMaxHeight())
-            is UiState.Error -> CustomEmptyOrErrorState(
-                drawableResId = R.drawable.ic_error,
-                textResId = R.string.error_msg_retrieving_ticker_list
-            )
+                is UiState.Loading -> CustomCircularProgressIndicator(modifier = Modifier.fillMaxHeight())
+                is UiState.Error -> CustomEmptyOrErrorState(
+                    drawableResId = R.drawable.ic_error,
+                    textResId = R.string.error_msg_retrieving_ticker_list
+                )
+            }
         }
     }
 }
