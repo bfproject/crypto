@@ -9,11 +9,12 @@ buildscript {
             'junitAndroid' : '1.1.5',
             'kotlinxCoroutinesCore': '1.8.0',
             'lifecycle' : '2.6.2',
+            'mockk' : '1.13.10',
             'moshi' : '1.14.0',
             'okhttp' : '4.10.0',
             'retrofit' : '2.9.0',
             'room' : '2.6.1',
-            'turbine' : '1.0.0'
+            'turbine' : '1.1.0'
     ]
 }
 
